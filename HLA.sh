@@ -2,6 +2,67 @@
 
 set -x
 
+while test $# -gt 0; do
+  case "$1" in
+    -i)
+      shift
+      if test $# -gt 0; then
+        SAMPLE=$1
+      else
+        echo 'Missing -i ID' && exit 1
+      fi
+      shift
+      ;;
+    -o)
+      shift
+      if test $# -gt 0; then
+        PATHTOOUTPUT=$1
+      else
+        echo 'Missing -o Output directory' && exit 1
+      fi
+      shift
+      ;;
+    -b)
+      shift
+      if test $# -gt 0; then
+        BAM=$1
+      else
+        echo 'Missing -b BAM file' && exit 1
+      fi
+      shift
+      ;;
+    --f1*)
+      shift
+      if test $# -gt 0; then
+        FASTQ1=$1
+      else
+        echo 'Missing --f1 FASTQ1 file' && exit 1
+      fi
+      shift
+      ;;
+    --f2*)
+      shift
+      if test $# -gt 0; then
+        FASTQ2=$1
+      else
+        echo 'Missing --f2 FASTQ2 file' && exit 1
+      fi
+      shift
+      ;;
+    *)
+      echo "An invalid option has been entered" && exit 0
+      ;;
+  esac
+done
+
+
+echo $SAMPLE
+echo $BAM
+echo $PATHTOOUTPUT
+echo $FASTQ1
+echo $FASTQ2
+
+
 ### folders
 REFDIR=${PWD}/Configuration
 OUTDIR=${PATHTOOUTPUT}/${SAMPLE}
@@ -45,5 +106,19 @@ mkdir -p ${HLA_ADDITIONAL}
   perl ${REFDIR}/parse_result.pl ${REFDIR}/Allelelist_v2.txt \
     ${HLA_ADDITIONAL}/${SAMPLE}'_results.txt' > ${HLA_ADDITIONAL}/${SAMPLE}'_Allele_Depth.txt'
 
+
+  echo "" > ${HLA_ADDITIONAL}/${SAMPLE}'_Top_2_Results.txt'
+
+  for gene in "A" "B" "C" "DQA1" "DQB1" "DRB1" "DPB1"; do
+    perl ${REFDIR}/parse_result.pl ${REFDIR}/Allelelist_v2.txt \
+      ${HLA_ADDITIONAL}/${SAMPLE}_results.txt | grep '^'${gene}'\*' | sort -k2 -n -r > ${TMPDIR}'/HLAVBSeq_HLA_'${gene}'.txt'
+    head -n 2 ${TMPDIR}'/HLAVBSeq_HLA_'${gene}'.txt' > ${TMPDIR}'/HLAVBSeq_HLA_Final_'${gene}'_Top2.txt'
+    cat ${TMPDIR}'/HLAVBSeq_HLA_Final_'${gene}'_Top2.txt' >> ${HLA_ADDITIONAL}/${SAMPLE}'_Top_2_Results.txt'
+  done
+
+  rm -r ${TMPDIR}
+
+  # HLA tables
+  python calling_hla_lookup_tables.py ${HLA} ${SAMPLE} ${HLA_ADDITIONAL}
 
 } 2>&1 | tee ${HLA}/HLA.log

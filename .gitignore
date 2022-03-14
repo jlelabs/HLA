@@ -1,0 +1,7 @@
+Configuration/Allelelist_v2.txt
+Configuration/call_hla_digits.py
+Configuration/hla_all_v2.fasta*
+Configuration/HLAVBSeq.jar
+Configuration/parse_result.pl
+.DS_Store
+__pycache__/
