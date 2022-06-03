@@ -21,7 +21,7 @@ Download the following from HLAVBSeq http://nagasakilab.csml.org/hla/ and transf
 
 ### Usage
 
-Download and configure NA12878 sample for ancestry estimation
+Download and configure NA12878 sample
 ```
 ./NA12878.sh
 ```
